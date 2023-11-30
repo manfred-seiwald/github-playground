@@ -93,14 +93,10 @@ def test_step(model: torch.nn.Module,
 
 # -------------- saving model -----------
 
-def save_model(name, model):
-    MODEL_PATH = Path("trained_models")
-    MODEL_PATH.mkdir(parents=True, exist_ok=True)
-
-    MODEL_NAME = name
-    MODEL_SAVE_PATH = MODEL_PATH / MODEL_NAME
-
-    torch.save(obj=model.state_dict(), f=MODEL_SAVE_PATH)
+def save_model(model_path, save_name, model):
+    Path(model_path).mkdir(parents=True, exist_ok=True)
+    model_save_path = os.path.join(model_path, save_name)
+    torch.save(obj=model.state_dict(), f=model_save_path)
 
 # --------- save figure ------------
 
@@ -168,7 +164,7 @@ def logits_learner(model, trainloader, testloader, epochs, lr, save_name):
             train_loss += loss
 
             # update metrics in tracker
-            train_tracker(train_logits, train_labels)
+            train_tracker(train_logits.to('cpu'), train_labels.to('cpu'))
 
             # optimizer step
             optimizer.zero_grad()
@@ -190,8 +186,8 @@ def logits_learner(model, trainloader, testloader, epochs, lr, save_name):
 
             for test_inputs, test_labels in testloader:
                 # getting on the right device
-                test_inputs.to(device)
-                test_labels.to(device)
+                test_inputs = test_inputs.to(device)
+                tst_labels = test_labels.to(device)
                 # start testing
                 test_logits = model(test_inputs.float())
                 # test_pred = torch.round(torch.sigmoid(test_logits))
@@ -201,7 +197,7 @@ def logits_learner(model, trainloader, testloader, epochs, lr, save_name):
                 test_loss += loss
 
                 # update metrics in tracker
-                test_tracker.update(test_logits, test_labels)
+                test_tracker.update(test_logits.to('cpu'), test_labels.to('cpu'))
 
             # test_loss per epoch
             test_loss /= len(testloader)
@@ -274,10 +270,12 @@ def logits_learner(model, trainloader, testloader, epochs, lr, save_name):
     os.rename(model_save_path, model_path + save_name + "_AUC:" + str(round(curr_best_auc, 4)) + ".pt")
     os.rename(figure_save_path, figure_path + "Metrics_" + save_name + "_AUC:" + str(round(curr_best_auc, 4)) + ".png")
 
+# ------------------------------------------------------------------------------------------------------------------------------
+
 # ------- probability learner -------
 def probability_learner(model, trainloader, testloader, epochs, lr, save_name, printprogress = False):
+    model_path = "trained_models/dropout60small/"
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = model
     criterion = nn.BCELoss()
     lr = lr
     optimizer = torch.optim.SGD(model.parameters(), lr=lr)
@@ -319,8 +317,8 @@ def probability_learner(model, trainloader, testloader, epochs, lr, save_name, p
 
         for batch, (train_inputs, train_labels) in enumerate(trainloader):
             # getting inputs and labels to right device
-            train_inputs.to(device)
-            train_labels.to(device)
+            train_inputs = train_inputs.to(device)
+            train_labels = train_labels.to(device)
             model.to(device)
             # start training
             model.train()
@@ -332,7 +330,7 @@ def probability_learner(model, trainloader, testloader, epochs, lr, save_name, p
             train_loss += loss
 
             # update metrics in tracker
-            train_tracker(train_prob, train_labels)
+            result = train_tracker(train_prob.to('cpu'), train_labels.to('cpu'))
 
             # optimizer step
             optimizer.zero_grad()
@@ -343,10 +341,10 @@ def probability_learner(model, trainloader, testloader, epochs, lr, save_name, p
         train_loss /= len(trainloader)
 
         # compute train_tracker
-        train_all_results = train_tracker.compute_all()
+        train_all_results = train_tracker.compute()
 
-        train_epoch_auc = train_all_results[epoch]["BinaryAUROC"]
-        train_epoch_acc = train_all_results[epoch]["BinaryAccuracy"]
+        train_epoch_auc = train_all_results["BinaryAUROC"]
+        train_epoch_acc = train_all_results["BinaryAccuracy"]
 
         # Testing the model
         model.eval()
@@ -354,8 +352,8 @@ def probability_learner(model, trainloader, testloader, epochs, lr, save_name, p
 
             for test_inputs, test_labels in testloader:
                 # getting on the right device
-                test_inputs.to(device)
-                test_labels.to(device)
+                test_inputs = test_inputs.to(device)
+                test_labels = test_labels.to(device)
                 # start testing
                 test_prob = model(test_inputs.float())
                 # test_pred = torch.round(test_prob)
@@ -365,18 +363,18 @@ def probability_learner(model, trainloader, testloader, epochs, lr, save_name, p
                 test_loss += loss
 
                 # update metrics in tracker
-                test_tracker.update(test_prob, test_labels)
+                test_tracker(test_prob.to('cpu'), test_labels.to('cpu'))
 
             # test_loss per epoch
             test_loss /= len(testloader)
 
         # compute tracker
-        test_all_results = test_tracker.compute_all()
+        test_all_results = test_tracker.compute()
 
-        test_epoch_auc = float(test_all_results[epoch]["BinaryAUROC"])
-        test_epoch_acc = float(test_all_results[epoch]["BinaryAccuracy"])
+        test_epoch_auc = float(test_all_results["BinaryAUROC"])
+        test_epoch_acc = float(test_all_results["BinaryAccuracy"])
 
-        # print metrics per epoch
+        #print metrics per epoch
         if printprogress == True:
             print(f"{epoch + 1}"
                   f"\t\t{train_loss:.4f}"
@@ -388,58 +386,62 @@ def probability_learner(model, trainloader, testloader, epochs, lr, save_name, p
         else:
             pass
 
-        if test_epoch_auc >= curr_best_auc:
-            curr_best_auc = test_epoch_auc
-            epoch_with_best_auc = (epoch + 1)
-            save_model(save_name, model)
+        # instead take the last 
+        curr_best_auc = test_epoch_auc            
+        
+        # if test_epoch_auc >= curr_best_auc:
+        #     curr_best_auc = test_epoch_auc
+        #     epoch_with_best_auc = (epoch + 1)
+        #     save_model(model_path, save_name, model)
 
-            # plotting testing steps
-            fig = plt.figure(layout="constrained")
-            ax1 = plt.subplot(2, 2, 1)
-            ax2 = plt.subplot(2, 2, 2)
-            ax3 = plt.subplot(2, 2, (3, 4))
+        #     # plotting testing steps
+        #     fig = plt.figure(layout="constrained")
+        #     ax1 = plt.subplot(2, 2, 1)
+        #     ax2 = plt.subplot(2, 2, 2)
+        #     ax3 = plt.subplot(2, 2, (3, 4))
 
-            bconfmat.plot(val=test_all_results[-1]['BinaryConfusionMatrix'], ax=ax1)
-            ax1.set_title("Testing-ConfusionMatrix")
+        #     bconfmat.plot(val=test_all_results[-1]['BinaryConfusionMatrix'], ax=ax1)
+        #     ax1.set_title("Testing-ConfusionMatrix")
 
-            broc.plot(curve=test_all_results[-1]["BinaryROC"], score=True, ax=ax2)
-            ax2.set_title("Testing-ROC")
+        #     broc.plot(curve=test_all_results[-1]["BinaryROC"], score=True, ax=ax2)
+        #     ax2.set_title("Testing-ROC")
 
-            test_scalar_results = [
-                {k: v for k, v in ar.items() if isinstance(v, torch.Tensor) and v.numel() == 1} for ar in
-                test_all_results
-            ]
-            train_tracker.plot(val=test_scalar_results, ax=ax3)
+        #     test_scalar_results = [
+        #         {k: v for k, v in ar.items() if isinstance(v, torch.Tensor) and v.numel() == 1} for ar in
+        #         test_all_results
+        #     ]
+        #     train_tracker.plot(val=test_scalar_results, ax=ax3)
 
-            for line in ax3.lines:
-                line.set_marker(".")
-            ax3.legend(loc='lower right', ncols=2, fontsize="small")
+        #     for line in ax3.lines:
+        #         line.set_marker(".")
+        #     ax3.legend(loc='lower right', ncols=2, fontsize="small")
 
-            save_metric_figure(save_name)
-            plt.close()
+        #     save_metric_figure(save_name)
+        #     plt.close()
 
-            patience = 10
-        else:
-            patience -= 1
+        #     patience = 10
+        # else:
+        #     patience -= 1
 
-        if patience == 0 or (epoch + 1) == NUM_EPOCHS:
-            print(
-                f"Probability learner terminated after Epoch: {epoch + 1}/{NUM_EPOCHS}, best recorded Test-AUC: {curr_best_auc:.4f} in Epoch: {epoch_with_best_auc}")
-            break
+        # if patience == 0 or (epoch + 1) == NUM_EPOCHS:
+        #     print(
+        #         f"Probability learner terminated after Epoch: {epoch + 1}/{NUM_EPOCHS}, best recorded Test-AUC: {curr_best_auc:.4f} in Epoch: {epoch_with_best_auc}")
+        #     break
     # reset metric trackers
     train_tracker.reset_all()
     test_tracker.reset_all()
 
     # rename model and metric figure
 
-    model_path = "trained_models/"
     model_save_path = model_path + save_name
 
-    figure_path = "metric_figures/"
-    figure_save_path = figure_path + save_name + ".png"
+    # figure_path = "metric_figures/"
+    # figure_save_path = figure_path + save_name + ".png"
 
-    os.rename(model_save_path, model_path + save_name + "_AUC:" + str(round(curr_best_auc, 4)) + ".pt")
-    os.rename(figure_save_path, figure_path + "Metrics_" + save_name + "_AUC:" + str(round(curr_best_auc, 4)) + ".png")
+    save_model(model_path, save_name, model)
+    # rename now makes no sense
+    os.rename(model_save_path, model_path + save_name + "_AUC_" + str(round(curr_best_auc, 8)) + ".pt")
+    #os.rename(figure_save_path, figure_path + "Metrics_" + save_name + "_AUC:" + str(round(curr_best_auc, 4)) + ".png")
 
 # ------------------ save correlation ------------------------
 

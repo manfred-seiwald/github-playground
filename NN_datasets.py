@@ -19,7 +19,7 @@ class ReactomeDataset(Dataset):
         self.n_samples = df.shape[0]
 
         # getting columns
-        # self.feature_names = self.features.columns
+        self.feature_names = list(self.features.columns)
 
     def __len__(self):
         return self.n_samples
