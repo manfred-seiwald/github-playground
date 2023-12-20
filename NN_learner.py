@@ -21,7 +21,7 @@ testloader = DataLoader(testset, batch_size=32, shuffle=False)  # shuffling does
 
 
 # ----------------- train/test loop ---------------
-for i in range(35):
+for i in range(10):
     print(i + 1)
     model = BinaryClassificationWithDropout(dropout=0.6)
     probability_learner(model, trainloader, testloader, 50, 0.01, "BinaryClassificationWithDropout60")

@@ -74,8 +74,8 @@ def test_step(model: torch.nn.Module,
         for test_inputs, test_labels in data_loader:
 
             # getting them to devie
-            test_inputs.to(device)
-            test_labels.to(device)
+            test_inputs = test_inputs.to(device)
+            test_inputs = test_labels.to(device)
 
             # forward pass
             test_logits = model(test_inputs.float())
@@ -319,8 +319,8 @@ def probability_learner(model, trainloader, testloader, epochs, lr, save_name, p
 
         for batch, (train_inputs, train_labels) in enumerate(trainloader):
             # getting inputs and labels to right device
-            train_inputs.to(device)
-            train_labels.to(device)
+            train_inputs = train_inputs.to(device)
+            train_labels = train_labels.to(device)
             model.to(device)
             # start training
             model.train()
@@ -332,7 +332,7 @@ def probability_learner(model, trainloader, testloader, epochs, lr, save_name, p
             train_loss += loss
 
             # update metrics in tracker
-            train_tracker(train_prob, train_labels)
+            train_tracker(train_prob.to('cpu'), train_labels.to('cpu'))
 
             # optimizer step
             optimizer.zero_grad()
@@ -354,8 +354,8 @@ def probability_learner(model, trainloader, testloader, epochs, lr, save_name, p
 
             for test_inputs, test_labels in testloader:
                 # getting on the right device
-                test_inputs.to(device)
-                test_labels.to(device)
+                test_inputs = test_inputs.to(device)
+                test_labels = test_labels.to(device)
                 # start testing
                 test_prob = model(test_inputs.float())
                 # test_pred = torch.round(test_prob)
@@ -365,7 +365,7 @@ def probability_learner(model, trainloader, testloader, epochs, lr, save_name, p
                 test_loss += loss
 
                 # update metrics in tracker
-                test_tracker.update(test_prob, test_labels)
+                test_tracker.update(test_prob.to('cpu'), test_labels.to('cpu'))
 
             # test_loss per epoch
             test_loss /= len(testloader)
