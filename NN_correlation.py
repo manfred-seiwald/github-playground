@@ -60,6 +60,7 @@ for item, drop in zip(corr_list,drop_out_values):
     g = sns.clustermap(corr_no_dropout, cmap="coolwarm", center=center, vmax=vmax, vmin=vmin, figsize=(8, 5))
     g.ax_col_dendrogram.set_visible(False)
     g.cax.set_visible(False)
+    # new comment from Manfred
     g.ax_heatmap.set_title(f"no_dropout")
     save_corr(f"no_dropout_clustermap")
 
