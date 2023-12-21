@@ -60,7 +60,7 @@ for item, drop in zip(corr_list,drop_out_values):
     save_corr(f"no_dropout_clustermap")
 
 # -------- subplots of heatmaps ------------
-#comment
+
 
 fig, axs = plt.subplots(2, 3)
 fig.tight_layout()
