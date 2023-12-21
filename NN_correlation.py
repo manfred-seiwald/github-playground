@@ -61,6 +61,7 @@ for item, drop in zip(corr_list,drop_out_values):
 
 # -------- subplots of heatmaps ------------
 
+#comment from Anna and Selina
 
 fig, axs = plt.subplots(2, 3)
 fig.tight_layout()
