@@ -2,6 +2,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+# comment from Manfred Seiwald
 from NN_utils import save_corr, upper
 
 # get attributes
