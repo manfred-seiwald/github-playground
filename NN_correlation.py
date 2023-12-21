@@ -59,7 +59,7 @@ for item, drop in zip(corr_list,drop_out_values):
     g.ax_col_dendrogram.set_visible(False)
     g.cax.set_visible(False)
     g.ax_heatmap.set_title(f"no_dropout")
-    save_corr(f"no_dropout_clustermap")
+    save_corr(f"no_dropout_clustermap") #interruption
 
 # -------- subplots of heatmaps ------------
 
