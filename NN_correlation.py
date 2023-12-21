@@ -48,7 +48,7 @@ for item, drop in zip(corr_list,drop_out_values):
     sns.heatmap(item, cmap="coolwarm",center=center, vmax=vmax, vmin=vmin, square=True,
                 cbar_kws={"shrink": .5}, xticklabels=2)
     fig.subplots_adjust(bottom=0.2)
-    plt.title(f"Correlation of feature importance with dropout {drop}%")
+    plt.title(f"Correlation of feature importance with dropout {drop}%") # Lok`tar Ogar
     plt.xlabel("Model")
     plt.ylabel("Model")
     save_corr(f"dropout{drop}_heatmap")
