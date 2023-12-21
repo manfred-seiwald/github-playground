@@ -51,16 +51,19 @@ for item, drop in zip(corr_list,drop_out_values):
     plt.ylabel("Model")
     save_corr(f"dropout{drop}_heatmap")
 
-# ------- clustermap ----------
-for item, drop in zip(corr_list,drop_out_values):
-    g = sns.clustermap(corr_no_dropout, cmap="coolwarm", center=center, vmax=vmax, vmin=vmin, figsize=(8, 5))
-    g.ax_col_dendrogram.set_visible(False)
-    g.cax.set_visible(False)
-    g.ax_heatmap.set_title(f"no_dropout")
-    save_corr(f"no_dropout_clustermap")
+
+def cluster_map():
+    # ------- clustermap ----------
+    for item, drop in zip(corr_list,drop_out_values):
+        g = sns.clustermap(corr_no_dropout, cmap="coolwarm", center=center, vmax=vmax, vmin=vmin, figsize=(8, 5))
+        g.ax_col_dendrogram.set_visible(False)
+        g.cax.set_visible(False)
+        g.ax_heatmap.set_title(f"no_dropout")
+        save_corr(f"no_dropout_clustermap")
+
 
 # -------- subplots of heatmaps ------------
-
+cluster_map()
 
 fig, axs = plt.subplots(2, 3)
 fig.tight_layout()
