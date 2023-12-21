@@ -2,6 +2,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+# 1. comment from Manfred
 from NN_utils import save_corr, upper
 
 # get attributes
@@ -11,6 +12,7 @@ dropout40_df = pd.read_csv("data/dropout40_attr.csv")
 dropout50_df = pd.read_csv("data/dropout50_attr.csv")
 dropout60_df = pd.read_csv("data/dropout60_attr.csv")
 dropout80_df = pd.read_csv("data/dropout80_attr.csv")
+# Für die Horde !!!!!!!!!!!!!!!!!!
 # transpose dataframe
 no_dropout_df = no_dropout_df.T
 dropout20_df = dropout20_df.T
@@ -60,8 +62,9 @@ def cluster_map():
         g = sns.clustermap(corr_no_dropout, cmap="coolwarm", center=center, vmax=vmax, vmin=vmin, figsize=(8, 5))
         g.ax_col_dendrogram.set_visible(False)
         g.cax.set_visible(False)
+        # new comment from Manfred
         g.ax_heatmap.set_title(f"no_dropout")
-        save_corr(f"no_dropout_clustermap")
+        save_corr(f"no_dropout_clustermap") # interruption
 
 # -------- subplots of heatmaps ------------
 
