@@ -2,7 +2,6 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-# 1. comment from Manfred
 from NN_utils import save_corr, upper
 
 # get attributes
@@ -12,7 +11,6 @@ dropout40_df = pd.read_csv("data/dropout40_attr.csv")
 dropout50_df = pd.read_csv("data/dropout50_attr.csv")
 dropout60_df = pd.read_csv("data/dropout60_attr.csv")
 dropout80_df = pd.read_csv("data/dropout80_attr.csv")
-# Für die Horde !!!!!!!!!!!!!!!!!!
 # transpose dataframe
 no_dropout_df = no_dropout_df.T
 dropout20_df = dropout20_df.T
@@ -55,18 +53,21 @@ def plot_heatmap():
         plt.ylabel("Model")
         save_corr(f"dropout{drop}_heatmap")
 
-# ------- clustermap ----------
-for item, drop in zip(corr_list,drop_out_values):
-    g = sns.clustermap(corr_no_dropout, cmap="coolwarm", center=center, vmax=vmax, vmin=vmin, figsize=(8, 5))
-    g.ax_col_dendrogram.set_visible(False)
-    g.cax.set_visible(False)
-    g.ax_heatmap.set_title(f"no_dropout")
-    save_corr(f"no_dropout_clustermap") #interruption
+
+def cluster_map():
+    # ------- clustermap ----------
+    for item, drop in zip(corr_list,drop_out_values):
+        g = sns.clustermap(corr_no_dropout, cmap="coolwarm", center=center, vmax=vmax, vmin=vmin, figsize=(8, 5))
+        g.ax_col_dendrogram.set_visible(False)
+        g.cax.set_visible(False)
+        g.ax_heatmap.set_title(f"no_dropout")
+        save_corr(f"no_dropout_clustermap")
 
 # -------- subplots of heatmaps ------------
 
 plot_heatmap()
 
+cluster_map()
 #comment from Anna and Selina!
 
 fig, axs = plt.subplots(2, 3)
