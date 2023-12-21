@@ -2,6 +2,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+# 1. comment from Manfred
 from NN_utils import save_corr, upper
 
 # get attributes
@@ -11,6 +12,7 @@ dropout40_df = pd.read_csv("data/dropout40_attr.csv")
 dropout50_df = pd.read_csv("data/dropout50_attr.csv")
 dropout60_df = pd.read_csv("data/dropout60_attr.csv")
 dropout80_df = pd.read_csv("data/dropout80_attr.csv")
+# Für die Horde !!!!!!!!!!!!!!!!!!
 # transpose dataframe
 no_dropout_df = no_dropout_df.T
 dropout20_df = dropout20_df.T
@@ -61,6 +63,7 @@ for item, drop in zip(corr_list,drop_out_values):
 
 # -------- subplots of heatmaps ------------
 
+#comment from Anna and Selina!
 
 fig, axs = plt.subplots(2, 3)
 fig.tight_layout()
