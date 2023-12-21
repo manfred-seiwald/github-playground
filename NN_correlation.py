@@ -42,16 +42,18 @@ drop_out_values = [0, 20, 40, 50, 60, 80]
 center = 0.5
 vmax = 1
 vmin = 0.5
-# -------------- single heatmap ------
-for item, drop in zip(corr_list,drop_out_values):
-    fig = plt.figure()
-    sns.heatmap(item, cmap="coolwarm",center=center, vmax=vmax, vmin=vmin, square=True,
-                cbar_kws={"shrink": .5}, xticklabels=2)
-    fig.subplots_adjust(bottom=0.2)
-    plt.title(f"Correlation of feature importance with dropout {drop}%")
-    plt.xlabel("Model")
-    plt.ylabel("Model")
-    save_corr(f"dropout{drop}_heatmap")
+
+def plot_heatmap():
+    # -------------- single heatmap ------
+    for item, drop in zip(corr_list,drop_out_values):
+        fig = plt.figure()
+        sns.heatmap(item, cmap="coolwarm",center=center, vmax=vmax, vmin=vmin, square=True,
+                    cbar_kws={"shrink": .5}, xticklabels=2)
+        fig.subplots_adjust(bottom=0.2)
+        plt.title(f"Correlation of feature importance with dropout {drop}%")
+        plt.xlabel("Model")
+        plt.ylabel("Model")
+        save_corr(f"dropout{drop}_heatmap")
 
 # ------- clustermap ----------
 for item, drop in zip(corr_list,drop_out_values):
@@ -62,6 +64,8 @@ for item, drop in zip(corr_list,drop_out_values):
     save_corr(f"no_dropout_clustermap") #interruption
 
 # -------- subplots of heatmaps ------------
+
+plot_heatmap()
 
 #comment from Anna and Selina!
 
